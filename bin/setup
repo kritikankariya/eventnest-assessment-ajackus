@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#
+# EventNest Setup Script
+# Installs dependencies, configures the database, and sets up git hooks.
+
+set -e
+
+echo "============================================"
+echo "  EventNest — Setup"
+echo "============================================"
+echo ""
+
+# Install git hooks for AI conversation capture
+echo "[1/4] Configuring git hooks..."
+git config core.hooksPath .git-hooks 2>/dev/null || true
+chmod +x .git-hooks/* 2>/dev/null || true
+echo "      AI conversation capture hooks installed."
+echo ""
+
+# Install dependencies
+echo "[2/4] Installing dependencies..."
+bundle install
+echo ""
+
+# Setup database
+echo "[3/4] Setting up database..."
+rails db:create db:migrate db:seed
+echo ""
+
+# Run test suite
+echo "[4/4] Running test suite to verify setup..."
+bundle exec rspec
+echo ""
+
+echo "============================================"
+echo "  Setup complete!"
+echo ""
+echo "  Start the server:  rails server"
+echo "  Run tests:         bundle exec rspec"
+echo "  Rails console:     rails c"
+echo ""
+echo "  Note: AI tool conversation logs are"
+echo "  automatically captured with each commit."
+echo "  See README for details."
+echo "============================================"

@@ -1,0 +1,18 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+
+development:
+  <<: *default
+  database: eventnest_development
+  username: eventnest
+  password: eventnest_dev
+  host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>
+
+test:
+  <<: *default
+  database: eventnest_test
+  username: eventnest
+  password: eventnest_dev
+  host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>
