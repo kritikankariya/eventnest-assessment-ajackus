@@ -7,7 +7,7 @@ module Api
         events = Event.published.upcoming
 
         if params[:search].present?
-          events = events.where("title LIKE '%#{params[:search]}%' OR description LIKE '%#{params[:search]}%'")
+          events = Event.where("title LIKE ? OR description LIKE ?", "%#{params[:search]}%", "%#{params[:search]}%")
         end
 
         if params[:category].present?
@@ -87,7 +87,12 @@ module Api
       end
 
       def update
-        event = Event.find(params[:id])
+        # FIX: Scope to current_user
+        event = current_user.events.find_by(id: params[:id])
+        
+        if event.nil?
+          return render json: { error: "Event not found or unauthorized" }, status: :not_found
+        end
 
         if event.update(event_params)
           render json: event
@@ -97,11 +102,26 @@ module Api
       end
 
       def destroy
-        event = Event.find(params[:id])
+        # FIX: Scope to current_user
+        event = current_user.events.find_by(id: params[:id])
+        
+        if event.nil?
+          return render json: { error: "Event not found or unauthorized" }, status: :not_found
+        end
+
         event.destroy
         head :no_content
       end
 
+      def bookmark_count
+        @event = Event.find(params[:id])
+        
+        if current_user.organizer? && current_user.id == @event.user_id
+          render json: { event_id: @event.id, bookmark_count: @event.bookmarks.count }
+        else
+          render json: { error: "Unauthorized. Only the organizer can view this." }, status: :forbidden
+        end
+      end
       private
 
       def event_params
